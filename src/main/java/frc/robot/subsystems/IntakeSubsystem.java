@@ -1,5 +1,5 @@
+package frc.robot.subsystems;
 
-mport com.revrobotics.RelativeEncoder;
 import com.revrobotics.sim.SparkRelativeEncoderSim;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
@@ -14,23 +14,39 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.BatterySim;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
-import edu.wpi.first.wpilibj.simulation.RoboRioSim;i
+import edu.wpi.first.wpilibj.simulation.RoboRioSim;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import main.java.frc.robot.Constants;
-import main.java.frc.robot.subsystems.ElevatorSubsystem.ControlMode;
+import frc.robot.Constants;
+//import frc.robot.subsystems.ElevatorSubsystem.ControlMode;
 
 import java.util.function.DoubleSupplier;
+
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.function.DoubleSupplier;
+
 @Logged(name = "Intake")
 public class IntakeSubsystem {
 
-    private final SparkMax intakeMotor = new SparkMax(Constants.Intake.intakeMotor, MotorType.kBrushless);
-    private final DigitalInput sensor = new DigitalInput(Constants.Intake.sensorPort);
+    SparkMax intakeMotor;
+    DigitalInput sensor;
 
+    public SparkMaxConfig SparkMaxConfig() {
+        SparkMaxConfig motorConfig = new SparkMaxConfig();
+        motorConfig.idleMode(IdleMode.kBrake).voltageCompensation(12).smartCurrentLimit(40);
+        return motorConfig;
+    }
+
+    public IntakeSubsystem(){
+        sensor = new DigitalInput(Constants.Intake.sensorID);
+        intakeMotor = new SparkMax(Constants.Intake.motorID, MotorType.kBrushless);
+    }
     public double getVoltage() {
         return intakeMotor.getAppliedOutput() * intakeMotor.getBusVoltage();
     }
@@ -40,10 +56,11 @@ public class IntakeSubsystem {
     }
 
     public void stop() {
-        intakeMotor.setVoltage(0);
+        intakeMotor.set(0);
     }
 
     public boolean hasCoral() {
         return sensor.get();
     }
+
 }
