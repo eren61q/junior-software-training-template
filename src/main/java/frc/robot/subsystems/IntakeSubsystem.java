@@ -32,7 +32,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
 
 @Logged(name = "Intake")
-public class IntakeSubsystem {
+public class IntakeSubsystem extends SubsystemBase {
 
     SparkMax intakeMotor;
     DigitalInput sensor;
@@ -62,5 +62,7 @@ public class IntakeSubsystem {
     public boolean hasCoral() {
         return sensor.get();
     }
-
+    public void periodic(){
+        SmartDashboard.putBoolean("hasCoral", hasCoral());
+    }
 }
