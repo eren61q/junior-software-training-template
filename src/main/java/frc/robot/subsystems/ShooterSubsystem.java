@@ -1,35 +1,15 @@
 package frc.robot.subsystems;
 
-import com.revrobotics.sim.SparkRelativeEncoderSim;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.SparkSim;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.epilogue.Logged;
-import edu.wpi.first.math.controller.ElevatorFeedforward;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.Notifier;
-import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.simulation.BatterySim;
-import edu.wpi.first.wpilibj.simulation.ElevatorSim;
-import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
-//import frc.robot.subsystems.ElevatorSubsystem.ControlMode;
-
-import java.util.function.DoubleSupplier;
-
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 @Logged(name = "Shooter")
 public class ShooterSubsystem extends SubsystemBase {
@@ -38,11 +18,10 @@ public class ShooterSubsystem extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
 
   SparkMax masterMotor;
-  private DigitalInput sensor;
+
 
   public ShooterSubsystem() {
     masterMotor = new SparkMax(Constants.Shooter.motorID, MotorType.kBrushless);
-    sensor = new DigitalInput(Constants.Intake.sensorID);
   }
 
   public void setVoltage(double voltage) {
@@ -53,9 +32,7 @@ public class ShooterSubsystem extends SubsystemBase {
     masterMotor.setVoltage(0);
   }
 
-  public boolean hasCoral() {
-    return sensor.get();
-  }
+
 
   public SparkMaxConfig SparkMaxConfig() {
     SparkMaxConfig motorConfig = new SparkMaxConfig();
@@ -64,7 +41,7 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public Command shootCommand(double voltage) {
-    return run(() -> setVoltage(voltage));
+    return runOnce(() -> setVoltage(voltage));
   }
 
   public Command shooterStop() {
@@ -73,15 +50,19 @@ public class ShooterSubsystem extends SubsystemBase {
 
   // default shoot
   public Command timedShoot(double voltage, double seconds) {
-    return run(() -> setVoltage(voltage)).withTimeout(seconds).finallyDo(interrupted -> stop());
+    return startEnd(
+        () -> setVoltage(voltage), // başlarken ve periodic çalışırken voltaj uygula
+        () -> stop()).until(() -> hasCoral());
 }
-
+  public boolean  hasCoral(){
+    boolean hasCoral = SmartDashboard.getBoolean("hasCoral", false);
+    return hasCoral;
+  }
 
   @Override
   public void periodic() {
     currentVoltage = masterMotor.getAppliedOutput() * 12;
     SmartDashboard.putNumber("Current Voltage", currentVoltage);
-    SmartDashboard.putBoolean("Has Coral", hasCoral());
   }
 
   @Override
