@@ -4,6 +4,8 @@ import frc.robot.Constants;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.config.AlternateEncoderConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -11,32 +13,45 @@ import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.AnalogPotentiometer;
+import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj.util.Color8Bit;
+
 
 public class ElevatorSubsystem extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
-  SparkMax masterMotor;
-  RelativeEncoder elEncoder;
-  AlternateEncoderConfig alternateEncoderConfig;
-  PIDController pidController;
+  private MechanismLigament2d m_elevator;
+  private SparkMax masterMotor;
+  private RelativeEncoder elEncoder;
+  private AlternateEncoderConfig alternateEncoderConfig;
+  private PIDController pidController;
   private double targetPosition;
   ElevatorFeedforward ff = new ElevatorFeedforward(Constants.Elevator.kS, Constants.Elevator.kG, Constants.Elevator.kV);
-  double voltage = ff.calculate(masterMotor.get());
 
   public ElevatorSubsystem() {
     masterMotor = new SparkMax(Constants.Elevator.masterID, MotorType.kBrushless);
     elEncoder = masterMotor.getAlternateEncoder();
     alternateEncoderConfig = new AlternateEncoderConfig();
-    pidController = new PIDController(2.2, 0, 0);
-
-  }
-
-  public SparkMaxConfig SparkMaxConfig() {
+    pidController = new PIDController(Constants.Elevator.kP, Constants.Elevator.kI, Constants.Elevator.kD);
     SparkMaxConfig motorConfig = new SparkMaxConfig();
     motorConfig.idleMode(IdleMode.kBrake).voltageCompensation(12).smartCurrentLimit(40);
-    return motorConfig;
+    masterMotor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    Mechanism2d mech = new Mechanism2d(3, 3);
+    MechanismRoot2d root = mech.getRoot("climber", 2, 0);
+    m_elevator = root.append(new MechanismLigament2d("elevator", Constants.Climb.Levels.baseHeight, 90));
+    SmartDashboard.putData("Mech2d", mech);
   }
+
+
 
   public void setVoltage(double voltage) {
     masterMotor.setVoltage(voltage);
@@ -44,7 +59,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   public void setPosition(double newTargetMeters) {
     targetPosition = newTargetMeters;
-    masterMotor.setVoltage(pidController.calculate(getPosition(), targetPosition));
+    masterMotor.setVoltage(pidController.calculate(getPosition(), targetPosition) + ff.calculate(masterMotor.get()));
   }
 
   public void stop() {
@@ -56,7 +71,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
 
   public void holdElevatorAtPosition() {
-    masterMotor.setVoltage(voltage);
+    masterMotor.setVoltage(ff.calculate(masterMotor.get()));
 
   }
 
@@ -86,12 +101,14 @@ public class ElevatorSubsystem extends SubsystemBase {
   public Command l4Score() {
     return runOnce(() -> setPosition(Constants.Climb.Levels.L4_SCORE));
   }
-
+  
+  
   @Override
   public void periodic() {
     SmartDashboard.putNumber("Current Position", getPosition());
     SmartDashboard.putNumber("Current Voltage", masterMotor.getAppliedOutput());
 
+    m_elevator.setLength(Constants.Climb.Levels.baseHeight + masterMotor.getEncoder().getPosition());
   }
 
   @Override
