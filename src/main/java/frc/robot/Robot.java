@@ -30,10 +30,6 @@ public class Robot extends TimedRobot
     instance = this;
   }
     
-  @Logged(name = "Intake/Has Coral")
-    public boolean hasCoral() {
-        return dioSensor.get(); 
-}
   
   public static Robot getInstance()
   {

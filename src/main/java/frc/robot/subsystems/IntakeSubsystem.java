@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 //import frc.robot.subsystems.ElevatorSubsystem.ControlMode;
 
-@Logged(name = "Intake")
+//@Logged(name = "Intake")
 public class IntakeSubsystem extends SubsystemBase {
 
     SparkMax intakeMotor;
@@ -51,7 +51,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     //kick out
     public Command intakeOut(){
-      return run(() -> setVoltage(-12)).until(() -> !hasCoral()).finallyDo(interrupted -> stop()); 
+      return run(() -> setVoltage(0.50)).until(() -> !hasCoral()).finallyDo(interrupted -> stop()); 
     }
 
     //default intake

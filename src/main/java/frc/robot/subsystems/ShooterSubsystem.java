@@ -3,6 +3,8 @@ package frc.robot.subsystems;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.epilogue.Logged;
@@ -11,17 +13,20 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
-@Logged(name = "Shooter")
+//@Logged(name = "Shooter")
 public class ShooterSubsystem extends SubsystemBase {
 
   private double currentVoltage;
   /** Creates a new ExampleSubsystem. */
 
   SparkMax masterMotor;
-
+  SparkMaxConfig motorConfig = new SparkMaxConfig();
+  
 
   public ShooterSubsystem() {
     masterMotor = new SparkMax(Constants.Shooter.motorID, MotorType.kBrushless);
+    motorConfig.idleMode(IdleMode.kBrake).voltageCompensation(12).smartCurrentLimit(40);
+    masterMotor.configure(motorConfig, null, null);
   }
 
   public void setVoltage(double voltage) {
@@ -34,11 +39,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
 
 
-  public SparkMaxConfig SparkMaxConfig() {
-    SparkMaxConfig motorConfig = new SparkMaxConfig();
-    motorConfig.idleMode(IdleMode.kBrake).voltageCompensation(12).smartCurrentLimit(40);
-    return motorConfig;
-  }
+ 
 
   public Command shootCommand(double voltage) {
     return runOnce(() -> setVoltage(voltage));

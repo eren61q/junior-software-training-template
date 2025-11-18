@@ -27,7 +27,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-@Logged(name = "Intake")
+//@Logged(name = "Intake")
 public class ClimbSubsystem {
 
     private final SparkMax masterMotor;
@@ -87,12 +87,12 @@ public class ClimbSubsystem {
         switch (state) {
             case OPENING:
 
-                masterMotor.setVoltage(0);
+                masterMotor.setVoltage(12);
 
                 break;
             case CLOSING:
 
-                masterMotor.setVoltage(0);
+                masterMotor.setVoltage(-12);
 
                 break;
             case HOLDING:
