@@ -18,9 +18,9 @@ import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 
-
 public class ElevatorSubsystem extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
+  private Mechanism2d mech;
   private MechanismLigament2d m_elevator;
   private SparkMax masterMotor;
   private RelativeEncoder elEncoder;
@@ -28,6 +28,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   private PIDController pidController;
   private double targetPosition;
   ElevatorFeedforward ff = new ElevatorFeedforward(Constants.Elevator.kS, Constants.Elevator.kG, Constants.Elevator.kV);
+  
 
   public ElevatorSubsystem() {
     masterMotor = new SparkMax(Constants.Elevator.masterID, MotorType.kBrushless);
@@ -37,13 +38,11 @@ public class ElevatorSubsystem extends SubsystemBase {
     SparkMaxConfig motorConfig = new SparkMaxConfig();
     motorConfig.idleMode(IdleMode.kBrake).voltageCompensation(12).smartCurrentLimit(40);
     masterMotor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    Mechanism2d mech = new Mechanism2d(3, 3);
-    MechanismRoot2d root = mech.getRoot("climber", 2, 0);
-    m_elevator = root.append(new MechanismLigament2d("elevator", Constants.Climb.Levels.baseHeight, 90));
+    mech = new Mechanism2d(3, 3);
+    MechanismRoot2d root = mech.getRoot("Elevator Root", 1.5, 1.5); 
+    m_elevator = root.append(new MechanismLigament2d("Elevator", 1.0, 90)); 
     SmartDashboard.putData("Mech2d", mech);
   }
-
-
 
   public void setVoltage(double voltage) {
     masterMotor.setVoltage(voltage);
@@ -93,8 +92,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   public Command l4Score() {
     return runOnce(() -> setPosition(Constants.Climb.Levels.L4_SCORE));
   }
-  
-  
+
   @Override
   public void periodic() {
     SmartDashboard.putNumber("Current Position", getPosition());
@@ -102,25 +100,17 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     m_elevator.setLength(Constants.Climb.Levels.baseHeight + masterMotor.getEncoder().getPosition());
   }
+  
 
   @Override
   public void simulationPeriodic() {
-    // Motor voltajına bağlı olarak pozisyonu simüle et
-    // Basit lineer simülasyon: position += voltage * dt
-    double dt = 0.02; // simülasyon periyodu 20 ms
-    double voltage = masterMotor.getAppliedOutput();
-    double newPosition = elEncoder.getPosition() + voltage * dt;
 
-    // Encoder simülasyonu güncelle
-    elEncoder.setPosition(newPosition);
+    double simulatedHeight = Constants.Climb.Levels.baseHeight + getPosition();
+    m_elevator.setLength(simulatedHeight);
 
-    // Mechanism2d güncelle
-    m_elevator.setLength(Constants.Climb.Levels.baseHeight + newPosition);
+    SmartDashboard.putNumber("Sim Elevator Position", getPosition());
+    SmartDashboard.putNumber("Sim Elevator Voltage", masterMotor.getAppliedOutput());
 
-    // SmartDashboard güncelle
-    SmartDashboard.putNumber("Sim Position", newPosition);
-    SmartDashboard.putNumber("Sim Voltage", voltage);
-}
-
+    
   }
-
+}

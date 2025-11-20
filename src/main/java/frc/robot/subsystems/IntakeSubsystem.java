@@ -51,7 +51,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     //kick out
     public Command intakeOut(){
-      return run(() -> setVoltage(0.50)).until(() -> !hasCoral()).finallyDo(interrupted -> stop()); 
+      return run(() -> setVoltage(-12)).until(() -> !hasCoral()).finallyDo(interrupted -> stop()); 
     }
 
     //default intake
