@@ -19,14 +19,12 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.wpilibj.DigitalInput;
 import java.util.function.DoubleSupplier;
 
-@Logged(name = "Intake")
-public class ClimbSubsystem {
+//@Logged(name = "Climb")
+public class ClimbSubsystem extends SubsystemBase {
 
     private String stateName;
 
     private final SparkMax masterMotor;
-
-    private final RelativeEncoder masterEncoder;
 
     private double targetMasterPosition;
 
@@ -34,9 +32,14 @@ public class ClimbSubsystem {
 
     private ClimbState state = ClimbState.IDLE;
 
-    public Command openClimb() {
-        return runOnce(() -> setState(ClimbState.OPENING)); 
+    public void setState(ClimbState cState){
+        state = cState;
     }
+
+    public Command openClimb() {
+        return runOnce(() -> setState(ClimbState.OPENING));
+    }
+
     public Command holdClimbCommand() {
         return runOnce(() -> setState(ClimbState.HOLDING));
     }
@@ -44,9 +47,9 @@ public class ClimbSubsystem {
     public Command closeClimb() {
         return runOnce(() -> setState(ClimbState.CLOSING));
     }
+
     public ClimbSubsystem() {
         masterMotor = new SparkMax(Constants.Climb.Climber.motorID, MotorType.kBrushless);
-        masterEncoder = masterMotor.getEncoder();
     }
 
     public enum ClimbState {
@@ -54,36 +57,6 @@ public class ClimbSubsystem {
         OPENING,
         CLOSING,
         HOLDING
-    }
-
-    public double getMasterAngle() {
-        return masterEncoder.getPosition() * 360.0; // position in angle
-    }
-
-    public void setState(ClimbState newState) {
-        state = newState;
-
-        switch (state) {
-            case HOLDING:
-                targetMasterPosition = masterEncoder.getPosition();
-
-                break;
-
-            case OPENING:
-                targetMasterPosition += 1.0; // adjust
-
-                break;
-
-            case CLOSING:
-                targetMasterPosition -= 1.0;
-
-                break;
-
-            case IDLE:
-            default:
-                // do nothing
-                break;
-        }
     }
 
     public void fastDeploy() {
@@ -111,8 +84,7 @@ public class ClimbSubsystem {
         motorConfig.idleMode(IdleMode.kBrake).voltageCompensation(12).smartCurrentLimit(40);
         return motorConfig;
     }
-    
-    
+
     public void periodic() {
         switch (state) {
             case OPENING:

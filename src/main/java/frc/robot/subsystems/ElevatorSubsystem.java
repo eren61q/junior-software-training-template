@@ -14,17 +14,9 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.AnalogPotentiometer;
-import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj.util.Color8Bit;
 
 
 public class ElevatorSubsystem extends SubsystemBase {
@@ -113,6 +105,22 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   @Override
   public void simulationPeriodic() {
-    // This method will be called once per scheduler run during simulation
-  }
+    // Motor voltajına bağlı olarak pozisyonu simüle et
+    // Basit lineer simülasyon: position += voltage * dt
+    double dt = 0.02; // simülasyon periyodu 20 ms
+    double voltage = masterMotor.getAppliedOutput();
+    double newPosition = elEncoder.getPosition() + voltage * dt;
+
+    // Encoder simülasyonu güncelle
+    elEncoder.setPosition(newPosition);
+
+    // Mechanism2d güncelle
+    m_elevator.setLength(Constants.Climb.Levels.baseHeight + newPosition);
+
+    // SmartDashboard güncelle
+    SmartDashboard.putNumber("Sim Position", newPosition);
+    SmartDashboard.putNumber("Sim Voltage", voltage);
 }
+
+  }
+
