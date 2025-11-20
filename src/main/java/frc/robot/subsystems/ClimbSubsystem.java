@@ -2,33 +2,27 @@ package frc.robot.subsystems;
 
 import frc.robot.Constants;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.sim.SparkRelativeEncoderSim;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.SparkSim;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.config.AlternateEncoderConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Notifier;
-import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.simulation.BatterySim;
-import edu.wpi.first.wpilibj.simulation.ElevatorSim;
-import edu.wpi.first.wpilibj.simulation.RoboRioSim;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
-import java.util.function.DoubleSupplier;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.wpilibj.DigitalInput;
+import java.util.function.DoubleSupplier;
 
-//@Logged(name = "Intake")
+@Logged(name = "Intake")
 public class ClimbSubsystem {
+
+    private String stateName;
 
     private final SparkMax masterMotor;
 
@@ -40,6 +34,16 @@ public class ClimbSubsystem {
 
     private ClimbState state = ClimbState.IDLE;
 
+    public Command openClimb() {
+        return runOnce(() -> setState(ClimbState.OPENING)); 
+    }
+    public Command holdClimbCommand() {
+        return runOnce(() -> setState(ClimbState.HOLDING));
+    }
+
+    public Command closeClimb() {
+        return runOnce(() -> setState(ClimbState.CLOSING));
+    }
     public ClimbSubsystem() {
         masterMotor = new SparkMax(Constants.Climb.Climber.motorID, MotorType.kBrushless);
         masterEncoder = masterMotor.getEncoder();
@@ -82,30 +86,24 @@ public class ClimbSubsystem {
         }
     }
 
-    // should be in periodic(check later)
-    public void update() {
-        switch (state) {
-            case OPENING:
+    public void fastDeploy() {
+        masterMotor.setVoltage(Constants.Climb.Climber.fastDeployVoltage);
+    }
 
-                masterMotor.setVoltage(12);
+    public void slowDeploy() {
+        masterMotor.setVoltage(Constants.Climb.Climber.slowDeployVoltage);
+    }
 
-                break;
-            case CLOSING:
+    public void hold() {
+        masterMotor.setVoltage(Constants.Climb.Climber.holdVoltage);
+    }
 
-                masterMotor.setVoltage(-12);
+    public void fastRetract() {
+        masterMotor.setVoltage(Constants.Climb.Climber.fastRetractVoltage);
+    }
 
-                break;
-            case HOLDING:
-
-                masterMotor.setVoltage(ffMaster);
-                break;
-
-            case IDLE:
-            default:
-                masterMotor.setVoltage(0);
-                break;
-        }
-
+    public void slowRetract() {
+        masterMotor.setVoltage(Constants.Climb.Climber.slowRetractVoltage);
     }
 
     public SparkMaxConfig SparkMaxConfig() {
@@ -113,5 +111,34 @@ public class ClimbSubsystem {
         motorConfig.idleMode(IdleMode.kBrake).voltageCompensation(12).smartCurrentLimit(40);
         return motorConfig;
     }
+    
+    
+    public void periodic() {
+        switch (state) {
+            case OPENING:
 
+                stateName = "Opening";
+                fastDeploy();
+                break;
+
+            case CLOSING:
+
+                stateName = "Closing";
+                fastRetract();
+                break;
+
+            case HOLDING:
+
+                stateName = "Holding";
+                hold();
+                break;
+
+            case IDLE:
+            default:
+                masterMotor.setVoltage(0);
+                break;
+        }
+        SmartDashboard.putString("State: ", stateName);
+        SmartDashboard.putNumber("Voltage: ", masterMotor.getAppliedOutput());
+    }
 }
