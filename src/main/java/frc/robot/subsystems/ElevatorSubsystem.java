@@ -7,8 +7,11 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.config.AlternateEncoderConfig;
+import com.revrobotics.spark.config.ClosedLoopConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
+
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -24,7 +27,6 @@ public class ElevatorSubsystem extends SubsystemBase {
   private MechanismLigament2d m_elevator;
   private SparkMax masterMotor;
   private RelativeEncoder elEncoder;
-  private AlternateEncoderConfig alternateEncoderConfig;
   private PIDController pidController;
   private double targetPosition;
   ElevatorFeedforward ff = new ElevatorFeedforward(Constants.Elevator.kS, Constants.Elevator.kG, Constants.Elevator.kV);
@@ -32,11 +34,11 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   public ElevatorSubsystem() {
     masterMotor = new SparkMax(Constants.Elevator.masterID, MotorType.kBrushless);
-    elEncoder = masterMotor.getAlternateEncoder();
-    alternateEncoderConfig = new AlternateEncoderConfig();
+    elEncoder = masterMotor.getEncoder();
     pidController = new PIDController(Constants.Elevator.kP, Constants.Elevator.kI, Constants.Elevator.kD);
     SparkMaxConfig motorConfig = new SparkMaxConfig();
-    motorConfig.idleMode(IdleMode.kBrake).voltageCompensation(12).smartCurrentLimit(40);
+
+    motorConfig.idleMode(IdleMode.kBrake).voltageCompensation(12).smartCurrentLimit(40).closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder);;
     masterMotor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     mech = new Mechanism2d(3, 3);
     MechanismRoot2d root = mech.getRoot("Elevator Root", 1.5, 1.5); 
@@ -98,15 +100,14 @@ public class ElevatorSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Current Position", getPosition());
     SmartDashboard.putNumber("Current Voltage", masterMotor.getAppliedOutput());
 
-    m_elevator.setLength(Constants.Climb.Levels.baseHeight + masterMotor.getEncoder().getPosition());
-  }
+    double simulatedHeight = Constants.Climb.Levels.baseHeight + getPosition();
+    m_elevator.setLength(simulatedHeight);
+
+      }
   
 
   @Override
   public void simulationPeriodic() {
-
-    double simulatedHeight = Constants.Climb.Levels.baseHeight + getPosition();
-    m_elevator.setLength(simulatedHeight);
 
     SmartDashboard.putNumber("Sim Elevator Position", getPosition());
     SmartDashboard.putNumber("Sim Elevator Voltage", masterMotor.getAppliedOutput());

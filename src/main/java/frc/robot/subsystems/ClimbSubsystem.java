@@ -91,6 +91,7 @@ public class ClimbSubsystem extends SubsystemBase {
 
                 stateName = "Opening";
                 fastDeploy();
+                
                 break;
 
             case CLOSING:
@@ -110,7 +111,7 @@ public class ClimbSubsystem extends SubsystemBase {
                 masterMotor.setVoltage(0);
                 break;
         }
-        SmartDashboard.putString("State: ", stateName);
+        SmartDashboard.putString("State: ", state.toString());
         SmartDashboard.putNumber("Voltage: ", masterMotor.getAppliedOutput());
     }
 }

@@ -11,30 +11,35 @@
       "style": "0",
       "userScale": "2",
       "width": "1280",
-      "xpos": "193",
-      "ypos": "106"
+      "xpos": "284",
+      "ypos": "267"
     }
   },
   "Window": {
     "###/FMSInfo": {
       "Collapsed": "0",
-      "Pos": "60,60",
-      "Size": "181,167"
+      "Pos": "101,386",
+      "Size": "202,194"
     },
     "###/SmartDashboard/Field": {
       "Collapsed": "0",
-      "Pos": "166,24",
-      "Size": "740,373"
+      "Pos": "240,29",
+      "Size": "771,370"
+    },
+    "###/SmartDashboard/Mech2d": {
+      "Collapsed": "0",
+      "Pos": "400,400",
+      "Size": "251,200"
     },
     "###FMS": {
       "Collapsed": "0",
       "Pos": "4,414",
-      "Size": "169,184"
+      "Size": "336,158"
     },
     "###Joysticks": {
       "Collapsed": "0",
       "Pos": "250,465",
-      "Size": "796,189"
+      "Size": "976,199"
     },
     "###Keyboard 0 Settings": {
       "Collapsed": "0",
@@ -59,12 +64,12 @@
     "###System Joysticks": {
       "Collapsed": "0",
       "Pos": "205,308",
-      "Size": "192,218"
+      "Size": "232,254"
     },
     "###Timing": {
       "Collapsed": "0",
       "Pos": "5,150",
-      "Size": "135,219"
+      "Size": "162,194"
     },
     "Debug##Default": {
       "Collapsed": "0",
@@ -74,7 +79,7 @@
     "Robot State": {
       "Collapsed": "0",
       "Pos": "7,20",
-      "Size": "92,116"
+      "Size": "118,134"
     }
   }
 }
