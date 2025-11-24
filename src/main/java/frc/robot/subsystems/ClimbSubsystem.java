@@ -1,34 +1,18 @@
 package frc.robot.subsystems;
 
 import frc.robot.Constants;
-import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.config.AlternateEncoderConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import edu.wpi.first.math.controller.ElevatorFeedforward;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.epilogue.Logged;
-import edu.wpi.first.wpilibj.DigitalInput;
-import java.util.function.DoubleSupplier;
 
 //@Logged(name = "Climb")
 public class ClimbSubsystem extends SubsystemBase {
 
-    private String stateName;
-
     private final SparkMax masterMotor;
-
-    private double targetMasterPosition;
-
-    private double ffMaster = 1; // determine
 
     private ClimbState state = ClimbState.IDLE;
 
@@ -89,20 +73,17 @@ public class ClimbSubsystem extends SubsystemBase {
         switch (state) {
             case OPENING:
 
-                stateName = "Opening";
                 fastDeploy();
                 
                 break;
 
             case CLOSING:
 
-                stateName = "Closing";
                 fastRetract();
                 break;
 
             case HOLDING:
 
-                stateName = "Holding";
                 hold();
                 break;
 
