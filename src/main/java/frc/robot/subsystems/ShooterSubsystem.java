@@ -49,11 +49,23 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   // default shoot
-  public Command timedShoot(double voltage, double seconds) {
+  public Command l1shoot() {
     return startEnd(
-        () -> setVoltage(voltage), // başlarken ve periodic çalışırken voltaj uygula
+        () -> setVoltage(Constants.Shooter.scoreL1Voltage),
         () -> stop()).until(() -> hasCoral());
 }
+public Command l2l3shoot() {
+  return startEnd(
+      () -> setVoltage(Constants.Shooter.scoreL2L3Voltage), 
+      () -> stop()).until(() -> hasCoral());
+}
+public Command l4shoot() {
+  return startEnd(
+      () -> setVoltage(Constants.Shooter.scoreL4Voltage), 
+      () -> stop()).until(() -> hasCoral());
+}
+
+
   public boolean  hasCoral(){
     boolean hasCoral = SmartDashboard.getBoolean("hasCoral", false);
     return hasCoral;
